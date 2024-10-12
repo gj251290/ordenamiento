@@ -10,7 +10,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
+import javax.swing.SwingWorker;
 
+import java.awt.Toolkit;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -30,6 +33,8 @@ public class FrmOrdenamiento extends JFrame {
     private JButton btnBuscar;
     private JTextField txtBuscar;
 
+    private JProgressBar progressBar;
+
     private JTable tblDocumentos;
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -47,11 +52,11 @@ public class FrmOrdenamiento extends JFrame {
         btnBuscar = new JButton();
         txtBuscar = new JTextField();
 
-        tblDocumentos = new JTable();
+        progressBar = new JProgressBar();
+        progressBar.setIndeterminate(true);
+        progressBar.setVisible(false);
 
-        setSize(800, 600);
-        setTitle("Ordenamiento Documentos");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        tblDocumentos = new JTable();
 
         btnOrdenarBurbuja.setIcon(new ImageIcon(getClass().getResource("/iconos/burbuja.png")));
         btnOrdenarBurbuja.setToolTipText("Ordenar Burbuja");
@@ -119,6 +124,7 @@ public class FrmOrdenamiento extends JFrame {
         });
         tbOrdenamiento.add(txtBuscar);
         tbOrdenamiento.add(btnBuscar);
+        tbOrdenamiento.add(progressBar);
 
         getContentPane().add(tbOrdenamiento, BorderLayout.NORTH);
 
@@ -130,50 +136,160 @@ public class FrmOrdenamiento extends JFrame {
         Documento.obtenerDatosDesdeArchivo(nombreArchivo);
         Documento.mostrarDatos(tblDocumentos);
 
+        setSize(800, 600);
+        Dimension pantalla = Toolkit.getDefaultToolkit().getScreenSize();
+        int anchoPantalla = pantalla.width;
+        int altoPantalla = pantalla.height;
+
+        int anchoVentana = getWidth();
+        int altoVentana = getHeight();
+
+        int posX = (anchoPantalla - anchoVentana) / 2;
+        int posY = (altoPantalla - altoVentana) / 2;
+
+        setLocation(posX, posY);
+        setTitle("Ordenamiento Documentos");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+    }
+
+    private void estadoBotones(boolean enabled) {
+        btnOrdenarBurbuja.setEnabled(enabled);
+        btnOrdenarRapido.setEnabled(enabled);
+        btnOrdenarInsercion.setEnabled(enabled);
+        btnOrdenarSeleccion.setEnabled(enabled);
+        btnOrdenarMezcla.setEnabled(enabled);
+
+        btnBuscar.setVisible(enabled);
+        txtBuscar.setVisible(enabled);
     }
 
     private void btnOrdenarBurbujaClick(ActionEvent evt) {
         if (cmbCriterio.getSelectedIndex() >= 0) {
+            estadoBotones(false);
+            progressBar.setVisible(true);
             Util.iniciarCronometro();
-            Documento.ordenarBurbuja(cmbCriterio.getSelectedIndex());
-            txtTiempo.setText(Util.getTextoTiempoCronometro());
-            Documento.mostrarDatos(tblDocumentos);
+
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() {
+                    Documento.ordenarBurbuja(cmbCriterio.getSelectedIndex());
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    txtTiempo.setText(Util.getTextoTiempoCronometro());
+                    Documento.mostrarDatos(tblDocumentos);
+                    progressBar.setVisible(false);
+                    estadoBotones(true);
+                }
+            };
+
+            worker.execute();
         }
     }
 
     private void btnOrdenarRapidoClick(ActionEvent evt) {
         if (cmbCriterio.getSelectedIndex() >= 0) {
+            estadoBotones(false);
+            progressBar.setVisible(true);
             Util.iniciarCronometro();
-            Documento.ordenarRapido(0, Documento.documentos.size() - 1, cmbCriterio.getSelectedIndex());
-            txtTiempo.setText(Util.getTextoTiempoCronometro());
-            Documento.mostrarDatos(tblDocumentos);
+
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() {
+                    Documento.ordenarRapido(0, Documento.documentos.size() - 1, cmbCriterio.getSelectedIndex());
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    txtTiempo.setText(Util.getTextoTiempoCronometro());
+                    Documento.mostrarDatos(tblDocumentos);
+                    progressBar.setVisible(false);
+                    estadoBotones(true);
+                }
+            };
+
+            worker.execute();
         }
     }
 
     private void btnOrdenarInsercionClick(ActionEvent evt) {
         if (cmbCriterio.getSelectedIndex() >= 0) {
+            estadoBotones(false);
+            progressBar.setVisible(true); // Muestra la barra de progreso
             Util.iniciarCronometro();
-            Documento.ordenarInsercion(cmbCriterio.getSelectedIndex());
-            txtTiempo.setText(Util.getTextoTiempoCronometro());
-            Documento.mostrarDatos(tblDocumentos);
+
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() {
+                    Documento.ordenarInsercion(cmbCriterio.getSelectedIndex());
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    txtTiempo.setText(Util.getTextoTiempoCronometro());
+                    Documento.mostrarDatos(tblDocumentos);
+                    progressBar.setVisible(false); // Oculta la barra de progreso
+                    estadoBotones(true);
+                }
+            };
+
+            worker.execute(); // Inicia la tarea en segundo plano
         }
     }
 
     private void btnOrdenarSeleccionClick(ActionEvent evt) {
         if (cmbCriterio.getSelectedIndex() >= 0) {
+            estadoBotones(false);
+            progressBar.setVisible(true); // Muestra la barra de progreso
             Util.iniciarCronometro();
-            Documento.ordenarSeleccion(cmbCriterio.getSelectedIndex());
-            txtTiempo.setText(Util.getTextoTiempoCronometro());
-            Documento.mostrarDatos(tblDocumentos);
+
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() {
+                    Documento.ordenarSeleccion(cmbCriterio.getSelectedIndex());
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    txtTiempo.setText(Util.getTextoTiempoCronometro());
+                    Documento.mostrarDatos(tblDocumentos);
+                    progressBar.setVisible(false); // Oculta la barra de progreso
+                    estadoBotones(true);
+                }
+            };
+
+            worker.execute(); // Inicia la tarea en segundo plano
         }
     }
 
     private void btnOrdenarMezclaClick(ActionEvent evt) {
         if (cmbCriterio.getSelectedIndex() >= 0) {
+            estadoBotones(false);
+            progressBar.setVisible(true); // Muestra la barra de progreso
             Util.iniciarCronometro();
-            Documento.ordenarMezcla(cmbCriterio.getSelectedIndex());
-            txtTiempo.setText(Util.getTextoTiempoCronometro());
-            Documento.mostrarDatos(tblDocumentos);
+
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() {
+                    Documento.ordenarMezcla(cmbCriterio.getSelectedIndex());
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    txtTiempo.setText(Util.getTextoTiempoCronometro());
+                    Documento.mostrarDatos(tblDocumentos);
+                    progressBar.setVisible(false); // Oculta la barra de progreso
+                    estadoBotones(true);
+                }
+            };
+
+            worker.execute(); // Inicia la tarea en segundo plano
         }
     }
 
