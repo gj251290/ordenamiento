@@ -218,7 +218,7 @@ public class FrmOrdenamiento extends JFrame {
     private void btnOrdenarInsercionClick(ActionEvent evt) {
         if (cmbCriterio.getSelectedIndex() >= 0) {
             estadoBotones(false);
-            progressBar.setVisible(true); // Muestra la barra de progreso
+            progressBar.setVisible(true);
             Util.iniciarCronometro();
 
             SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
@@ -232,19 +232,19 @@ public class FrmOrdenamiento extends JFrame {
                 protected void done() {
                     txtTiempo.setText(Util.getTextoTiempoCronometro());
                     Documento.mostrarDatos(tblDocumentos);
-                    progressBar.setVisible(false); // Oculta la barra de progreso
+                    progressBar.setVisible(false);
                     estadoBotones(true);
                 }
             };
 
-            worker.execute(); // Inicia la tarea en segundo plano
+            worker.execute();
         }
     }
 
     private void btnOrdenarSeleccionClick(ActionEvent evt) {
         if (cmbCriterio.getSelectedIndex() >= 0) {
             estadoBotones(false);
-            progressBar.setVisible(true); // Muestra la barra de progreso
+            progressBar.setVisible(true);
             Util.iniciarCronometro();
 
             SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
@@ -258,19 +258,19 @@ public class FrmOrdenamiento extends JFrame {
                 protected void done() {
                     txtTiempo.setText(Util.getTextoTiempoCronometro());
                     Documento.mostrarDatos(tblDocumentos);
-                    progressBar.setVisible(false); // Oculta la barra de progreso
+                    progressBar.setVisible(false);
                     estadoBotones(true);
                 }
             };
 
-            worker.execute(); // Inicia la tarea en segundo plano
+            worker.execute();
         }
     }
 
     private void btnOrdenarMezclaClick(ActionEvent evt) {
         if (cmbCriterio.getSelectedIndex() >= 0) {
             estadoBotones(false);
-            progressBar.setVisible(true); // Muestra la barra de progreso
+            progressBar.setVisible(true);
             Util.iniciarCronometro();
 
             SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
@@ -284,12 +284,12 @@ public class FrmOrdenamiento extends JFrame {
                 protected void done() {
                     txtTiempo.setText(Util.getTextoTiempoCronometro());
                     Documento.mostrarDatos(tblDocumentos);
-                    progressBar.setVisible(false); // Oculta la barra de progreso
+                    progressBar.setVisible(false);
                     estadoBotones(true);
                 }
             };
 
-            worker.execute(); // Inicia la tarea en segundo plano
+            worker.execute();
         }
     }
 
