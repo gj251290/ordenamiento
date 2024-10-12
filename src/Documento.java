@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
 
 public class Documento {
 
@@ -51,7 +52,9 @@ public class Documento {
         if (br != null) {
             try {
                 String linea = br.readLine();
-                encabezados = linea.split(";");
+                if (linea != null) {
+                    encabezados = linea.split(";");
+                }
                 linea = br.readLine();
                 while (linea != null) {
                     String[] textos = linea.split(";");
@@ -62,7 +65,11 @@ public class Documento {
                     linea = br.readLine();
                 }
             } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Error al leer el archivo: " + ex.getMessage(), "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
+        } else {
+            JOptionPane.showMessageDialog(null, "No se pudo abrir el archivo.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -156,4 +163,92 @@ public class Documento {
         ordenarRapido(pivote + 1, fin, criterio);
     }
 
+    public static void ordenarInsercion(int criterio) {
+        for (int i = 1; i < documentos.size(); i++) {
+            Documento clave = documentos.get(i);
+            int j = i - 1;
+            while (j >= 0 && esMayor(documentos.get(j), clave, criterio)) {
+                documentos.set(j + 1, documentos.get(j));
+                j--;
+            }
+            documentos.set(j + 1, clave);
+        }
+    }
+
+    public static void ordenarSeleccion(int criterio) {
+        for (int i = 0; i < documentos.size() - 1; i++) {
+            int indiceMin = i;
+            for (int j = i + 1; j < documentos.size(); j++) {
+                if (esMayor(documentos.get(indiceMin), documentos.get(j), criterio)) {
+                    indiceMin = j;
+                }
+            }
+            if (indiceMin != i) {
+                intercambiar(i, indiceMin);
+            }
+        }
+    }
+
+    public static void ordenarMezcla(int criterio) {
+        documentos = mergeSort(documentos, criterio);
+    }
+
+    private static List<Documento> mergeSort(List<Documento> lista, int criterio) {
+        if (lista.size() <= 1) {
+            return lista;
+        }
+
+        int medio = lista.size() / 2;
+        List<Documento> izquierda = new ArrayList<>(lista.subList(0, medio));
+        List<Documento> derecha = new ArrayList<>(lista.subList(medio, lista.size()));
+
+        izquierda = mergeSort(izquierda, criterio);
+        derecha = mergeSort(derecha, criterio);
+
+        return merge(izquierda, derecha, criterio);
+    }
+
+    private static List<Documento> merge(List<Documento> izquierda, List<Documento> derecha, int criterio) {
+        List<Documento> resultado = new ArrayList<>();
+        int i = 0, j = 0;
+
+        while (i < izquierda.size() && j < derecha.size()) {
+            if (!esMayor(izquierda.get(i), derecha.get(j), criterio)) {
+                resultado.add(izquierda.get(i));
+                i++;
+            } else {
+                resultado.add(derecha.get(j));
+                j++;
+            }
+        }
+
+        while (i < izquierda.size()) {
+            resultado.add(izquierda.get(i));
+            i++;
+        }
+
+        while (j < derecha.size()) {
+            resultado.add(derecha.get(j));
+            j++;
+        }
+
+        return resultado;
+    }
+
+    public static Documento buscar(String termino, int criterio) {
+        for (Documento doc : documentos) {
+            if (criterio == 0) {
+                if (doc.getNombreCompleto().toLowerCase().contains(termino.toLowerCase()) ||
+                        doc.getDocumento().toLowerCase().contains(termino.toLowerCase())) {
+                    return doc;
+                }
+            } else {
+                if (doc.getDocumento().toLowerCase().contains(termino.toLowerCase()) ||
+                        doc.getNombreCompleto().toLowerCase().contains(termino.toLowerCase())) {
+                    return doc;
+                }
+            }
+        }
+        return null;
+    }
 }
